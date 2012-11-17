@@ -6,8 +6,9 @@
 public class ExponentialMovingAverage extends Strategy {
 
     public ExponentialMovingAverage() {
-        type = "ExponentialMovingAverage";
-        typeInt = EXPONENTIAL_MOVING_AVERAGE; //2
+        type = "Exponential Moving Average";
+        acronym = "EMA";
+        typeInt = 2;
     }
 
     @Override

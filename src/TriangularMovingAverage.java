@@ -10,7 +10,8 @@ public class TriangularMovingAverage extends Strategy {
     public TriangularMovingAverage(SimpleMovingAverage SMA) {
         mySMA = SMA;
         type = "Triangular Moving Average";
-        typeInt = TRIANGULAR_MOVING_AVERAGE; //3
+        acronym = "TMA";
+        typeInt = 3;
     }
 
     @Override
@@ -36,7 +37,5 @@ public class TriangularMovingAverage extends Strategy {
         }
 
         return (sumOfWeightedPrices / sumOfWeightingFactors);
-
-
     }
 }

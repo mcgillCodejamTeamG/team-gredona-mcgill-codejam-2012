@@ -1,5 +1,4 @@
 
-
 /**
  * The Linear Weighted Moving Average uses weighting factors to assign more importance to recent data points.
  * @author Team Gredona
@@ -8,7 +7,8 @@ public class LinearWeightedMovingAverage extends Strategy {
 
     public LinearWeightedMovingAverage() {
         type = "Linear Weighted Moving Average";
-        typeInt = LINEAR_WEIGHTED_MOVING_AVERAGE; //1
+        acronym = "LWMA";
+        typeInt = 1;
     }
 
     @Override

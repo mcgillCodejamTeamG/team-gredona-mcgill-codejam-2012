@@ -1,3 +1,4 @@
+package codejamstrategies;
 /**
  *
  * @author Team Gredona
@@ -17,7 +18,7 @@ public abstract class Strategy {
     /**
      * The type of strategy
      */
-    String type;
+    String type, acronym;
     int typeInt;
     /**
      * Instantiates a "first in first out" buffer of size SLOW_PERIOD = 20 or
@@ -69,7 +70,7 @@ public abstract class Strategy {
         if (slowDataBuffer.size() != 0) {
             oldestSlowDatapoint = slowDataBuffer.peek();
         }
-        slowDataBuffer.add(newDataPoint);
+        fastDataBuffer.add(newDataPoint);
     }
 
     /**
@@ -90,7 +91,6 @@ public abstract class Strategy {
      * @return the strategy's recommended course of action
      */
     protected int decideTradingAction() {
-	/**
         if (currentFastMovingAverage == currentSlowMovingAverage) {
             if (currentFastMovingAverage > previousFastMovingAverage) {
                 return BUY;
@@ -99,7 +99,7 @@ public abstract class Strategy {
                 return SELL;
             }
         }
-**/
+
         if (previousFastMovingAverage > previousSlowMovingAverage && currentFastMovingAverage < currentSlowMovingAverage) {
             return BUY;
         }
@@ -131,5 +131,9 @@ public abstract class Strategy {
     @Override
     public String toString() {
         return type;
+    }
+    
+    public String getAcronym() {
+        return acronym;
     }
 }

@@ -1,5 +1,3 @@
-
-
 /**
  * Unweighted mean of the last N data points
  *
@@ -15,7 +13,8 @@ public class SimpleMovingAverage extends Strategy {
 
     public SimpleMovingAverage() {
         type = "Simple Moving Average";
-        typeInt = SIMPLE_MOVING_AVERAGE; //0
+        acronym = "SMA";
+        typeInt = 0;
     }
 
     /**
