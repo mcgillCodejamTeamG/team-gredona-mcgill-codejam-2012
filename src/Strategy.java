@@ -1,5 +1,3 @@
-
-
 /**
  *
  * @author Team Gredona
@@ -39,8 +37,8 @@ public abstract class Strategy {
      * @return the action recommended by the strategy ( BUY, HOLD, or SELL )
      */
     public double update(double newDataPoint) {
-        updateSlowDataQueue(newDataPoint);
-        updateFastDataQueue(newDataPoint);
+        updateSlowDataBuffer(newDataPoint);
+        updateFastDataBuffer(newDataPoint);
         previousSlowMovingAverage = currentSlowMovingAverage;
         currentSlowMovingAverage = computeSlowMovingAverage();
         previousFastMovingAverage = currentFastMovingAverage;
@@ -51,7 +49,7 @@ public abstract class Strategy {
     /**
      * @param newDataPoint
      */
-    public void updateFastDataQueue(double newDataPoint) {
+    public void updateFastDataBuffer(double newDataPoint) {
         oldestFastDatapoint = fastDataBuffer.peek();
         fastDataBuffer.add(newDataPoint);
     }
@@ -59,7 +57,7 @@ public abstract class Strategy {
     /**
      * @param newDataPoint
      */
-    public void updateSlowDataQueue(double newDataPoint) {
+    public void updateSlowDataBuffer(double newDataPoint) {
         oldestSlowDatapoint = slowDataBuffer.peek();
         fastDataBuffer.add(newDataPoint);
     }
