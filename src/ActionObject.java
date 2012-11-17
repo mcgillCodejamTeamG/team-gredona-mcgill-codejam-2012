@@ -13,7 +13,7 @@ public class ActionObject{
 	public String getStrategy(){
 		return strategy;
 	}
-	public String getTime(){
+	public int getTime(){
 		return time;
 	}
 }

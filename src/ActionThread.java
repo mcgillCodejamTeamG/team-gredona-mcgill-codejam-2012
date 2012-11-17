@@ -1,9 +1,19 @@
-
-import net.sf.json.JSONObject;  // need to include in dependencies
-import net.sf.json.JSONSerializer;
-import java.io.DataInputStream;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.net.Socket;
 import java.io.DataOutputStream;
-import java.lang.Integer;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Writer;
+import java.net.UnknownHostException;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.json.JSONException;
+import org.json.JSONObject;
 /**
 * Thread which takes action methods sends information to the server and creates JSON
 * @author TeamG
@@ -23,8 +33,13 @@ public class ActionThread extends Thread{
 **/
 	public ActionThread(){
 		json = new JSONObject();
-		json.put("team","Team G")
-		json.put("destination", "mcgillcodejam2012@gmail.com")
+		try{
+                    json.put("team","Team G");
+                    json.put("destination", "mcgillcodejam2012@gmail.com");
+                }catch(JSONException e){
+                    e.printStackTrace();
+                }
+                
 		q = new LinkedList<ActionObject>();
 		try{
 			skt = new Socket("localhost", 1234);
@@ -41,7 +56,7 @@ public class ActionThread extends Thread{
 * Sends a buy order to the server, adds to JSON
 * @author TeamG
 **/
-	private buy(ActionObject buy){
+private ActionObject buy(ActionObject buy) throws IOException, JSONException{
 		int price = 0;
 		dOut.writeChar(66);
 
@@ -66,13 +81,14 @@ public class ActionThread extends Thread{
 		transaction.put("manager", manager);
 		transaction.put("strategy", strategy);
 		json.accumulate("transactions", transaction);
+                return buy;
 	}
 
 /**
 * Sends a sell order to the server, adds to JSON
 * @author TeamG
 **/
-	private sell(ActionObject sell){
+private ActionObject sell(ActionObject sell) throws IOException, JSONException{
 		int price = 0;
 		dOut.writeChar(83);
 
@@ -97,17 +113,17 @@ public class ActionThread extends Thread{
 		transaction.put("manager", manager);
 		transaction.put("strategy", strategy);
 		json.accumulate("transactions", transaction);
-	}
+                return sell;
+}
 
 /**
 * Ends the socket connection and datastreams, saves the json to a .txt file
 * @author TeamG
 **/
-	private end(){
+private void end() throws IOException, JSONException{
 		loop = false;
 		dOut.flush();
 		dOut.close();
-		dIn.flush();
 		dIn.close();
 		skt.close();
 
@@ -123,9 +139,10 @@ public class ActionThread extends Thread{
 * Adds an action to the running Queue of actions
 * @author TeamG
 **/
-	public addAction(String action, String strategy, int time){
-		ActionObject action = new ActionObject(action, strategy, time);
-		q.add(ActionObject action);
+public ActionObject addAction(String action, String strategy, int time){
+		ActionObject newaction = new ActionObject(action, strategy, time);
+		q.add(newaction);
+                return newaction;
 	}
 /**
 * Sets up the runnable loop which checks whether the Queue is empty, dequeues the next action if there is one
@@ -136,15 +153,35 @@ public class ActionThread extends Thread{
 			if (q.peek()!=null){
 				ActionObject currentAction = q.remove();
 				if(currentAction.getType() == "BUY"){
-					this.buy(currentAction);
+                                try {
+                                    this.buy(currentAction);
+                                } catch (IOException ex) {
+                                    Logger.getLogger(ActionThread.class.getName()).log(Level.SEVERE, null, ex);
+                                } catch (JSONException ex) {
+                                    Logger.getLogger(ActionThread.class.getName()).log(Level.SEVERE, null, ex);
+                                }
 				}
 				else if(currentAction.getType() == "SELL"){
-					this.sell(currentAction);
+                                try {
+                                    this.sell(currentAction);
+                                } catch (IOException ex) {
+                                    Logger.getLogger(ActionThread.class.getName()).log(Level.SEVERE, null, ex);
+                                } catch (JSONException ex) {
+                                    Logger.getLogger(ActionThread.class.getName()).log(Level.SEVERE, null, ex);
+                                }
 				}
 				else if(currentAction.getType() == "END"){
-					this.end()
+                                try {
+                                    this.end();
+                                } catch (IOException ex) {
+                                    Logger.getLogger(ActionThread.class.getName()).log(Level.SEVERE, null, ex);
+                                } catch (JSONException ex) {
+                                    Logger.getLogger(ActionThread.class.getName()).log(Level.SEVERE, null, ex);
+                                }
 				}
 			}
 		}
 	}
+
+
 }
