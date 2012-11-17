@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.io.Writer;
 import java.net.UnknownHostException;
 import java.util.LinkedList;
@@ -21,16 +22,23 @@ import org.json.JSONObject;
  *
  * @author TeamG
 *
- */
+ * */ 
+
+
+
 public class ActionThread extends Thread {
 
+    private enum ConnectionState { LISTENING, CONNECTING, CONNECTED, CLOSED }
+
+	
     Queue<ActionObject> q;
     JSONObject json;
-    Socket skt;
-    DataOutputStream dOut;
-    BufferedReader dIn;
-    boolean loop = true;
-
+    Socket socket;
+    PrintWriter out;
+    BufferedReader in;
+    ConnectionState state; 
+    
+    
     /**
      * Constructor for the thread, sets up socket connection and Data Streams,
      * also begins JSON
@@ -48,49 +56,122 @@ public class ActionThread extends Thread {
         }
 
         q = new LinkedList<ActionObject>();
-        try {
-            skt = new Socket("localhost", 1234);
-            dOut = new DataOutputStream(skt.getOutputStream());
-            dIn = new BufferedReader(new InputStreamReader(skt.getInputStream()));
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
+    
+    synchronized private void connectionOpened() throws IOException{
+    	//set up input and state
+    	in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+    	out = new PrintWriter(socket.getOutputStream()); 
+    	state = ConnectionState.CONNECTED;
+
+    }
+    
+    /**
+     * This is called by the run() method when the connection is closed
+     * from the other side.  (This is detected when an end-of-stream is
+     * encountered on the input stream.)  It posts a message to the
+     * transcript and sets the connection state to CLOSED.
+     */
+    synchronized private void connectionClosedFromOtherSide() {
+       if (state == ConnectionState.CONNECTED) {
+          state = ConnectionState.CLOSED;
+       }
+    }
+    
+    
+    synchronized void close() {
+	         state = ConnectionState.CLOSED;
+	         try {
+	            if (socket != null)
+	               socket.close();
+	           
+	         }
+	         catch (IOException e) {
+	         }
+	      }
+    
+    /**
+     * Called from the finally clause of the run() method to clean up
+     * after the network connection closes for any reason.
+     */
+    private void cleanUp() {
+       state = ConnectionState.CLOSED;
+       if (socket != null && !socket.isClosed()) {
+             // Make sure that the socket, if any, is closed.
+          try {
+             socket.close();
+          }
+          catch (IOException e) {
+          }
+       }
+    
+       socket = null;
+       in = null;
+       out = null; 
+       
+       
+       String jsonString = this.json.toString(2);
+		Writer output = null;
+		File file = new File("json.txt");
+		output = new BufferedWriter(new FileWriter(file));
+	    output.write(jsonString);
+	    output.close();
+    }
+    
+    
     /**
      * Sends a buy order to the server, adds to JSON
      *
      * @author TeamG
 *
      */
-    private ActionObject buy(ActionObject buy) throws IOException, JSONException {
-        float price = 0;
-        dOut.writeChar(66);
+    synchronized private void buy(ActionObject buy) throws IOException, JSONException {
+       
+    	float price = 0;
+        out.println('B');
 
         int time = buy.getTime();
-        String strategy = buy.getStrategy();
+        Strategy strategy = buy.getStrategy();
 
-        String input = dIn.readLine();
-        input = input.replace("|", "");
-        try {
-            price = java.lang.Float.parseFloat(input);
-        } catch (NumberFormatException e) {
-            e.printStackTrace(); //The price sent isn't a price, so an error occurred
-        }
+        
+        // Get input************
+        char c; 
+		int size = 0; 
+		char cbuf[] = new char[7]; 
+		while (true){
+			c = (char)in.read(); 
+			if (c == '|' || size >= cbuf.length)
+				break; 
+			cbuf[size] = c; 
+			size++; 
+		}
+		String message = ""; 
+		for (int i = 0; i < size; i++)
+			message += cbuf[i]; 
+	
+		if (message.charAt(0) == 'E'){
+			connectionClosedFromOtherSide(); 
+		}else{
+		
+			try {
+				price = Float.parseFloat(message); 
+			}catch(NumberFormatException e){
+				System.out.println("Error string not float"); 
+				System.out.println(e); 
+			}
+			
+			int manager = ManagerSchedule.getManager(time, strategy.getTypeInt());
 
-        String manager;
-        manager = managerLookup(); // need to get method
-
-        JSONObject transaction = new JSONObject();
-        transaction.put("time", time);
-        transaction.put("type", "buy");
-        transaction.put("price", price);
-        transaction.put("manager", manager);
-        transaction.put("strategy", strategy);
-        json.accumulate("transactions", transaction);
-        return buy;
+	        JSONObject transaction = new JSONObject();
+	        transaction.put("time", time);
+	        transaction.put("type", "buy");
+	        transaction.put("price", price);
+	        transaction.put("manager", "Manager"+manager);
+	        transaction.put("strategy", strategy.toString());
+	        json.accumulate("transactions", transaction);
+		}
+        
     }
 
     /**
@@ -99,52 +180,52 @@ public class ActionThread extends Thread {
      * @author TeamG
 *
      */
-    private ActionObject sell(ActionObject sell) throws IOException, JSONException {
+    synchronized private void sell(ActionObject sell) throws IOException, JSONException {
         float price = 0;
-        dOut.writeChar(83);
+        out.println('S');
 
         int time = sell.getTime();
-        String strategy = sell.getStrategy();
+        Strategy strategy = sell.getStrategy();
 
-        String input = dIn.readLine();
-        input = input.replace("|", "");
-        try {
-            price = java.lang.Float.parseFloat(input);
-        } catch (NumberFormatException e) {
-        }
+   
+        // Get input************
+        char c; 
+		int size = 0; 
+		char cbuf[] = new char[7]; 
+		while (true){
+			c = (char)in.read(); 
+			if (c == '|' || size >= cbuf.length)
+				break; 
+			cbuf[size] = c; 
+			size++; 
+		}
+		String message = ""; 
+		for (int i = 0; i < size; i++)
+			message += cbuf[i]; 
+	
+		if (message.charAt(0) == 'E'){
+			connectionClosedFromOtherSide(); 
+		}else{
+			
+			try {
+				price = Float.parseFloat(message); 
+			}catch(NumberFormatException e){
+				System.out.println("Error string not float"); 
+				System.out.println(e); 
+			}
+			
+			
+			int manager = ManagerSchedule.getManager(time, strategy.getTypeInt());
 
-        String manager;
-        manager = managerLookup(); // need to get method
-
-        JSONObject transaction = new JSONObject();
-        transaction.put("time", time);
-        transaction.put("type", "sell");
-        transaction.put("price", price);
-        transaction.put("manager", manager);
-        transaction.put("strategy", strategy);
-        json.accumulate("transactions", transaction);
-        return sell;
-    }
-
-    /**
-     * Ends the socket connection and datastreams, saves the json to a .txt file
-     *
-     * @author TeamG
-*
-     */
-    private void end() throws IOException, JSONException {
-        loop = false;
-        dOut.flush();
-        dOut.close();
-        dIn.close();
-        skt.close();
-
-        String jsonString = this.json.toString(2);
-        Writer output = null;
-        File file = new File("json.txt");
-        output = new BufferedWriter(new FileWriter(file));
-        output.write(jsonString);
-        output.close();
+	        JSONObject transaction = new JSONObject();
+	        transaction.put("time", time);
+	        transaction.put("type", "sell");
+	        transaction.put("price", price);
+	        transaction.put("manager", "manager"+manager);
+	        transaction.put("strategy", strategy.toString());
+	        json.accumulate("transactions", transaction);
+			
+		}
     }
 
     /**
@@ -153,9 +234,10 @@ public class ActionThread extends Thread {
      * @author TeamG
 *
      */
-    public ActionObject addAction(String action, String strategy, int time) {
+    public ActionObject addAction(String action, Strategy strategy, int time) {
         ActionObject newaction = new ActionObject(action, strategy, time);
         q.add(newaction);
+        this.notify(); 
         return newaction;
     }
 
@@ -167,35 +249,50 @@ public class ActionThread extends Thread {
 *
      */
     public void run() {
-        while (loop) {
-            if (q.peek() != null) {
-                ActionObject currentAction = q.remove();
-                if ("BUY".equals(currentAction.getType())) {
-                    try {
-                        this.buy(currentAction);
-                    } catch (IOException ex) {
-                        Logger.getLogger(ActionThread.class.getName()).log(Level.SEVERE, null, ex);
-                    } catch (JSONException ex) {
-                        Logger.getLogger(ActionThread.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                } else if ("SELL".equals(currentAction.getType())) {
-                    try {
-                        this.sell(currentAction);
-                    } catch (IOException ex) {
-                        Logger.getLogger(ActionThread.class.getName()).log(Level.SEVERE, null, ex);
-                    } catch (JSONException ex) {
-                        Logger.getLogger(ActionThread.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                } else if ("END".equals(currentAction.getType())) {
-                    try {
-                        this.end();
-                    } catch (IOException ex) {
-                        Logger.getLogger(ActionThread.class.getName()).log(Level.SEVERE, null, ex);
-                    } catch (JSONException ex) {
-                        Logger.getLogger(ActionThread.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
-            }
-        }
+    	
+       	try {
+    		if (state == ConnectionState.CONNECTING){
+    			socket = new Socket(remoteHost, port); 
+    		}
+    		connectionOpened(); 
+    		
+    		char cbuf[] = new char[7]; 
+    		while (state == ConnectionState.CONNECTED){
+    			
+    			 while (q.peek() != null) {
+    	                ActionObject currentAction = q.remove();
+    	                
+    	                switch (currentAction.getType()){
+    	            
+    	                	case "BUY":
+    	                		buy(currentAction); 
+    	                		break; 
+    	                	case "SELL":
+    	                		sell(currentAction); 
+    	                	case "END":
+    	                		cleanUp(); 
+    	                	
+    	                
+    	                }
+    	            }	
+    			 
+    			 this.wait(); 
+    		}
+    		
+    	}catch (Exception e) {    		
+    		
+	               // An error occurred.  Report it to the user, but not
+	               // if the connection has been closed (since the error
+	               // might be the expected error that is generated when
+	               // a socket is closed).
+	            if (state != ConnectionState.CLOSED){
+	               System.out.println("\n\n Trading ERROR:  " + e);
+	            }
+    	}finally{
+    		
+    		cleanUp(); 
+    	}
     }
+    
+
 }
