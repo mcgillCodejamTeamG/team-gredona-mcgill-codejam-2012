@@ -15,10 +15,10 @@ public class TriangularMovingAverage extends Strategy {
     }
 
     @Override
-    protected double computeSlowMovingAverage() {
+    protected float computeSlowMovingAverage() {
         int t = slowDataBuffer.size();
         int sumOfWeightingFactors = (t * (1 + t)) / 2;
-        double sumOfWeightedPrices = 0;
+        float sumOfWeightedPrices = 0;
         for (int index = 0; index < t; index++) {
             sumOfWeightedPrices += mySMA.getSlowBufferValue(index) * (index + 1);
         }
@@ -28,10 +28,10 @@ public class TriangularMovingAverage extends Strategy {
     }
 
     @Override
-    protected double computeFastMovingAverage() {
+    protected float computeFastMovingAverage() {
         int t = fastDataBuffer.size();
         int sumOfWeightingFactors = (t * (1 + t)) / 2;
-        double sumOfWeightedPrices = 0;
+        float sumOfWeightedPrices = 0;
         for (int index = 0; index < t; index++) {
             sumOfWeightedPrices += mySMA.getFastBufferValue(index) * (index + 1);
         }

@@ -11,10 +11,10 @@ public class LinearWeightedMovingAverage extends Strategy {
     }
 
     @Override
-    protected double computeSlowMovingAverage() {
+    protected float computeSlowMovingAverage() {
         int t = slowDataBuffer.size();
         int sumOfWeightingFactors = (t * (1 + t)) / 2;
-        double sumOfWeightedPrices = 0;
+        float sumOfWeightedPrices = 0;
         //if (slowDataBuffer.getLimit() > slowDataBuffer.size()) {
         for (int index = 0; index < t; index++) {
             
@@ -27,10 +27,10 @@ public class LinearWeightedMovingAverage extends Strategy {
     }
 
     @Override
-    protected double computeFastMovingAverage() {
+    protected float computeFastMovingAverage() {
         int t = fastDataBuffer.size();
         int sumOfWeightingFactors = (t * (1 + t)) / 2;
-        double sumOfWeightedPrices = 0;
+        float sumOfWeightedPrices = 0;
         //if (fastDataBuffer.getLimit() > fastDataBuffer.size()) {
         for (int index = 0; index < t; index++) {
             //For any period, the current price is multiplied by N, the previous price is multiplied by N-1, and so on

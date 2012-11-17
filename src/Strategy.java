@@ -1,3 +1,5 @@
+
+
 /**
  *
  * @author Team Gredona
@@ -5,9 +7,9 @@
  */
 public abstract class Strategy {
 
-    public static final int BUY = 1;
+    public static final int BUY = -1;
     public static final int HOLD = 0;
-    public static final int SELL = -1;
+    public static final int SELL = 1;
     public static final int FAST_PERIOD = 5;
     public static final int SLOW_PERIOD = 20;
     /**
@@ -16,14 +18,14 @@ public abstract class Strategy {
     String type;
     /**
      * Instantiates a "first in first out" buffer of size SLOW_PERIOD = 20 or
-     * FAST_PERIOD = 5 that contains doubles. When the buffer is full (ie size()
+     * FAST_PERIOD = 5 that contains floats. When the buffer is full (ie size()
      * = 20 or 5, respectively), the head is removed to create space
      */
-    protected CircularFIFOBuffer<Double> slowDataBuffer = new CircularFIFOBuffer(SLOW_PERIOD);
-    protected CircularFIFOBuffer<Double> fastDataBuffer = new CircularFIFOBuffer(FAST_PERIOD);
-    protected double currentFastMovingAverage, currentSlowMovingAverage;
-    protected double previousFastMovingAverage, previousSlowMovingAverage;
-    protected double oldestFastDatapoint, oldestSlowDatapoint;
+    protected CircularFIFOBuffer<Float> slowDataBuffer = new CircularFIFOBuffer(SLOW_PERIOD);
+    protected CircularFIFOBuffer<Float> fastDataBuffer = new CircularFIFOBuffer(FAST_PERIOD);
+    protected float currentFastMovingAverage, currentSlowMovingAverage;
+    protected float previousFastMovingAverage, previousSlowMovingAverage;
+    protected float oldestFastDatapoint, oldestSlowDatapoint;
 
     /**
      * Constructor
@@ -36,7 +38,7 @@ public abstract class Strategy {
      *
      * @return the action recommended by the strategy ( BUY, HOLD, or SELL )
      */
-    public int update(double newDataPoint) {
+    public int update(float newDataPoint) {
         updateSlowDataBuffer(newDataPoint);
         updateFastDataBuffer(newDataPoint);
         previousSlowMovingAverage = currentSlowMovingAverage;
@@ -49,16 +51,21 @@ public abstract class Strategy {
     /**
      * @param newDataPoint
      */
-    protected void updateFastDataBuffer(double newDataPoint) {
-        oldestFastDatapoint = fastDataBuffer.peek();
+    protected void updateFastDataBuffer(float newDataPoint) {
+        if (fastDataBuffer.size() != 0) {
+            oldestFastDatapoint = fastDataBuffer.peek();
+        }
+
         fastDataBuffer.add(newDataPoint);
     }
 
     /**
      * @param newDataPoint
      */
-    protected void updateSlowDataBuffer(double newDataPoint) {
-        oldestSlowDatapoint = slowDataBuffer.peek();
+    protected void updateSlowDataBuffer(float newDataPoint) {
+        if (slowDataBuffer.size() != 0) {
+            oldestSlowDatapoint = slowDataBuffer.peek();
+        }
         fastDataBuffer.add(newDataPoint);
     }
 
@@ -66,15 +73,17 @@ public abstract class Strategy {
      *
      * @return the average over the last 20
      */
-    protected abstract double computeSlowMovingAverage();
+    protected abstract float computeSlowMovingAverage();
 
     /**
      * @return the average over the last 5
      */
-    protected abstract double computeFastMovingAverage();
+    protected abstract float computeFastMovingAverage();
 
     /**
-     * Detects crossover.  If there is a crossover, this method decides whether or not to buy or sell.  Otherwise it holds.
+     * Detects crossover. If there is a crossover, this method decides whether
+     * or not to buy or sell. Otherwise it holds.
+     *
      * @return the strategy's recommended course of action
      */
     protected int decideTradingAction() {
@@ -90,10 +99,10 @@ public abstract class Strategy {
         if (previousFastMovingAverage > previousSlowMovingAverage && currentFastMovingAverage < currentSlowMovingAverage) {
             return BUY;
         }
-        
+
         if (previousFastMovingAverage < previousSlowMovingAverage && currentFastMovingAverage > currentSlowMovingAverage) {
             return SELL;
-          
+
         }
         return HOLD;
     }

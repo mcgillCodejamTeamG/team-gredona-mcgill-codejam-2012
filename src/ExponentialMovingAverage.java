@@ -9,9 +9,9 @@ public class ExponentialMovingAverage extends Strategy {
     }
 
     @Override
-    protected double computeSlowMovingAverage() {
+    protected float computeSlowMovingAverage() {
         //int t = slowDataBuffer.size();
-        double alpha = 2 / (SLOW_PERIOD + 1);
+        float alpha = 2 / (SLOW_PERIOD + 1);
         
         //Because N and t are not dependent on each other, we can let EMA_1 = price_1
         if (slowDataBuffer.size() == 1) {
@@ -23,9 +23,9 @@ public class ExponentialMovingAverage extends Strategy {
     }
 
     @Override
-    protected double computeFastMovingAverage() {
+    protected float computeFastMovingAverage() {
         //int t = slowDataBuffer.size();
-        double alpha = 2 / (SLOW_PERIOD + 1);
+        float alpha = 2 / (SLOW_PERIOD + 1);
         
         //Because N and t are not dependent on each other, we can let EMA_1 = price_1
         if (fastDataBuffer.size() == 1) {
