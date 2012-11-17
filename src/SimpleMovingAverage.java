@@ -15,7 +15,7 @@ public class SimpleMovingAverage extends Strategy {
 
     public SimpleMovingAverage() {
         type = "Simple Moving Average";
-        typeInt = 0;
+        typeInt = SIMPLE_MOVING_AVERAGE; //0
     }
 
     /**
