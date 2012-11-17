@@ -49,7 +49,7 @@ public abstract class Strategy {
     /**
      * @param newDataPoint
      */
-    public void updateFastDataBuffer(double newDataPoint) {
+    protected void updateFastDataBuffer(double newDataPoint) {
         oldestFastDatapoint = fastDataBuffer.peek();
         fastDataBuffer.add(newDataPoint);
     }
@@ -57,7 +57,7 @@ public abstract class Strategy {
     /**
      * @param newDataPoint
      */
-    public void updateSlowDataBuffer(double newDataPoint) {
+    protected void updateSlowDataBuffer(double newDataPoint) {
         oldestSlowDatapoint = slowDataBuffer.peek();
         fastDataBuffer.add(newDataPoint);
     }
@@ -77,7 +77,7 @@ public abstract class Strategy {
      * Detects crossover.  If there is a crossover, this method decides whether or not to buy or sell.  Otherwise it holds.
      * @return the strategy's recommended course of action
      */
-    public double decideTradingAction() {
+    protected double decideTradingAction() {
         if (currentFastMovingAverage == currentSlowMovingAverage) {
             if (currentFastMovingAverage > previousFastMovingAverage) {
                 return BUY;
