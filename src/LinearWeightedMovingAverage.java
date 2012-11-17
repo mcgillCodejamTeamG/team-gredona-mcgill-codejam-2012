@@ -1,10 +1,12 @@
+package codejamstrategies;
 
 /**
+ * The Linear Weighted Moving Average uses weighting factors to assign more importance to recent data points.
  * @author Team Gredona
  */
-public class LinearWeightMovingAverage extends Strategy {
+public class LinearWeightedMovingAverage extends Strategy {
 
-    public LinearWeightMovingAverage() {
+    public LinearWeightedMovingAverage() {
         type = "Linear Weighted Moving Average";
     }
 
@@ -16,7 +18,7 @@ public class LinearWeightMovingAverage extends Strategy {
         //if (slowDataBuffer.getLimit() > slowDataBuffer.size()) {
         for (int index = 0; index < t; index++) {
             
-            //For any period, the current price is multiplied by N, the previous price is multiplied by N-1, and so on
+            //For any period N, the current price is multiplied by N, the previous price is multiplied by N-1, and so on
             sumOfWeightedPrices += slowDataBuffer.get(index) * (index + 1); 
         }
 

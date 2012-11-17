@@ -1,4 +1,4 @@
-
+package codejamstrategies;
 
 /**
  * Smoothed version of the Simple Moving Average (SMA)
