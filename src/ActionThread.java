@@ -1,17 +1,15 @@
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.net.InetAddress;
+import java.net.Socket;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.Writer;
-import java.net.InetAddress;
-import java.net.Socket;
 import java.util.LinkedList;
 import java.util.Queue;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -35,8 +33,9 @@ public class ActionThread extends Thread {
     private PrintWriter out;
     private BufferedReader in;
     private ConnectionState state;
-    private InetAddress host;
     private int port;
+    private InetAddress host;
+    private static int jsonCounter=0;
 
     /**
      * Constructor for the thread, sets up socket connection and Data Streams,
@@ -46,22 +45,24 @@ public class ActionThread extends Thread {
      *
      */
     public ActionThread(InetAddress host, int port) {
-        json = new JSONObject();
-        try {
-            json.put("team", "Team G");
-            json.put("destination", "mcgillcodejam2012@gmail.com");
-        } catch (JSONException e) {
-            System.out.println("There's a problem with the JSON.");
-        }
+
         this.host = host;
         this.port = port;
+
+        json = new JSONObject();
         q = new LinkedList<ActionObject>();
+
+        state = ConnectionState.CONNECTING;
+        this.start();
     }
 
     synchronized private void connectionOpened() throws IOException {
         //set up input and state
         in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         out = new PrintWriter(socket.getOutputStream());
+
+        System.out.println("Trading Connected");
+
         state = ConnectionState.CONNECTED;
 
     }
@@ -84,6 +85,7 @@ public class ActionThread extends Thread {
             if (socket != null) {
                 socket.close();
             }
+
         } catch (IOException e) {
         }
     }
@@ -91,6 +93,9 @@ public class ActionThread extends Thread {
     /**
      * Called from the finally clause of the run() method to clean up after the
      * network connection closes for any reason.
+     *
+     * @throws JSONException
+     * @throws IOException
      */
     private void cleanUp() throws JSONException, IOException {
         state = ConnectionState.CLOSED;
@@ -106,10 +111,13 @@ public class ActionThread extends Thread {
         in = null;
         out = null;
 
+        json.put("team", "Team G");
+        json.put("destination", "mcgillcodejam2012@gmail.com");
 
         String jsonString = this.json.toString(2);
-        Writer output;
-        File file = new File("json.txt");
+        Writer output = null;
+        File file = new File("json"+jsonCounter+".txt");
+        jsonCounter++;
         output = new BufferedWriter(new FileWriter(file));
         output.write(jsonString);
         output.close();
@@ -121,51 +129,65 @@ public class ActionThread extends Thread {
      * @author TeamG
      *
      */
+    // TODO
     synchronized private void buy(ActionObject buy) throws IOException, JSONException {
 
         float price = 0;
         out.println('B');
+        out.flush();
+        if (out.checkError()) {
+            System.out.println("\nTrading Error: OCCURRED WHILE TRYING TO SEND DATA.");
+            close();
+        }
 
         int time = buy.getTime();
         Strategy strategy = buy.getStrategy();
 
 
-        // Get input
+        // Get input************
         char c;
         int size = 0;
         char cbuf[] = new char[7];
-        while (true) {
+        int decimal = 0;
+        boolean decimalFlag = false;
+        while (decimal < 3) {
             c = (char) in.read();
-            if (c == '|' || size >= cbuf.length) {
-                break;
-            }
+
             cbuf[size] = c;
             size++;
+
+            if (decimalFlag) {
+                decimal++;
+            }
+
+            if (c == '.') {
+                decimalFlag = true;
+            }
+
+            if (c == 'E') {
+                break;
+            }
         }
+
         String message = "";
         for (int i = 0; i < size; i++) {
             message += cbuf[i];
         }
 
+
         if (message.charAt(0) == 'E') {
-            connectionClosedFromOtherSide();
+            System.out.println("Received Trading E");
         } else {
 
-            try {
-                price = Float.parseFloat(message);
-            } catch (NumberFormatException e) {
-                System.out.println("Error string not float");
-                System.out.println(e);
-            }
 
             int manager = ManagerSchedule.getManager(time, strategy.getTypeInt());
 
             JSONObject transaction = new JSONObject();
             transaction.put("time", time);
             transaction.put("type", "buy");
-            transaction.put("price", price);
-            transaction.put("manager", "Manager" + manager);
-            transaction.put("strategy", strategy.toString());
+            transaction.put("price", message);
+            transaction.put("manager", "manager " + manager);
+            transaction.put("strategy", strategy.getAcronym());
             json.accumulate("transactions", transaction);
         }
 
@@ -180,22 +202,39 @@ public class ActionThread extends Thread {
     synchronized private void sell(ActionObject sell) throws IOException, JSONException {
         float price = 0;
         out.println('S');
+        out.flush();
+        if (out.checkError()) {
+            System.out.println("\nTrading Error: OCCURRED WHILE TRYING TO SEND DATA.");
+            close();
+        }
 
         int time = sell.getTime();
         Strategy strategy = sell.getStrategy();
 
 
-        // Get input
+        // Get input************
         char c;
         int size = 0;
         char cbuf[] = new char[7];
-        while (true) {
+        int decimal = 0;
+        boolean decimalFlag = false;
+        while (decimal < 3) {
             c = (char) in.read();
-            if (c == '|' || size >= cbuf.length) {
-                break;
-            }
+
             cbuf[size] = c;
             size++;
+
+            if (decimalFlag) {
+                decimal++;
+            }
+
+            if (c == '.') {
+                decimalFlag = true;
+            }
+
+            if (c == 'E') {
+                break;
+            }
         }
         String message = "";
         for (int i = 0; i < size; i++) {
@@ -203,15 +242,8 @@ public class ActionThread extends Thread {
         }
 
         if (message.charAt(0) == 'E') {
-            connectionClosedFromOtherSide();
+            System.out.println("Received Trading E");
         } else {
-
-            try {
-                price = Float.parseFloat(message);
-            } catch (NumberFormatException e) {
-                System.out.println("Error string not float");
-                System.out.println(e);
-            }
 
 
             int manager = ManagerSchedule.getManager(time, strategy.getTypeInt());
@@ -219,9 +251,9 @@ public class ActionThread extends Thread {
             JSONObject transaction = new JSONObject();
             transaction.put("time", time);
             transaction.put("type", "sell");
-            transaction.put("price", price);
-            transaction.put("manager", "manager" + manager);
-            transaction.put("strategy", strategy.toString());
+            transaction.put("price", message);
+            transaction.put("manager", "manager " + manager);
+            transaction.put("strategy", strategy.getAcronym());
             json.accumulate("transactions", transaction);
 
         }
@@ -236,7 +268,7 @@ public class ActionThread extends Thread {
     public ActionObject addAction(String action, Strategy strategy, int time) {
         ActionObject newaction = new ActionObject(action, strategy, time);
         q.add(newaction);
-        this.notify();
+
         return newaction;
     }
 
@@ -255,22 +287,22 @@ public class ActionThread extends Thread {
             }
             connectionOpened();
 
-            char cbuf[] = new char[7];
             while (state == ConnectionState.CONNECTED) {
 
+                ActionObject currentAction = null;
                 while (q.peek() != null) {
-                    ActionObject currentAction = q.remove();
+                    currentAction = q.remove();
+                    if (currentAction.getType().equals("BUY")) {
+                        buy(currentAction);
+                    } else if (currentAction.getType().equals("SELL")) {
+                        sell(currentAction);
+                    } else if (currentAction.getType().equals("END")) {
+                        cleanUp();
+                    }
+                }
 
-                if ("BUY".equals(currentAction.getType())) {
-                        this.buy(currentAction);
-                } else if ("SELL".equals(currentAction.getType())) {
-                        this.sell(currentAction);
-                } else if ("END".equals(currentAction.getType())) {
-                        this.cleanUp();
-                }
-                }
-                this.wait();
-            }
+
+            }   //end while connected
 
         } catch (Exception e) {
 
@@ -282,12 +314,13 @@ public class ActionThread extends Thread {
                 System.out.println("\n\n Trading ERROR:  " + e);
             }
         } finally {
+
             try {
                 cleanUp();
-            } catch (JSONException ex) {
-                Logger.getLogger(ActionThread.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (IOException ex) {
-                Logger.getLogger(ActionThread.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
     }

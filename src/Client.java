@@ -1,4 +1,4 @@
-
+package util;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -29,6 +29,9 @@ public class Client {
 	private int time; 
 	private Strategy[] strategies; 
 	
+	
+	private ActionThread actionThread; 
+	
 	public Client(){
 	
 		port = defaultPort; 
@@ -39,7 +42,13 @@ public class Client {
 			e.printStackTrace();
 		}
 		
-		strategies = new Strategy[NUM_STRATEGIES]; 
+		strategies = new Strategy[NUM_STRATEGIES];
+		SimpleMovingAverage sma = new SimpleMovingAverage(); 
+		addStrategy(sma); 
+		addStrategy(new ExponentialMovingAverage());
+		addStrategy(new LinearWeightedMovingAverage()); 
+		addStrategy(new TriangularMovingAverage(sma)); 		
+		
 	}
 	
 	
@@ -58,6 +67,7 @@ public class Client {
 		if (priceFeed != null)
 			priceFeed.close(); 
 		priceFeed = new PriceFeed(host, port); 
+		actionThread = new ActionThread(host, port+1); 
 	}
 	 
 	public void addStrategy(Strategy s){
@@ -127,20 +137,21 @@ public class Client {
 	       * determine if it is necessary to buy or sell. 
 	       * @param price the price last read in from price feed sent over by exchange
 	       */
-	      synchronized private void received(double price){
+	      synchronized private void received(float price){
 	    	  if (state == ConnectionState.CONNECTED){
 	    		  
 	    		  for (Strategy s: strategies){
 	    			  
-	    			  int result = (int)s.update(price); 
+	    			  if (s == null) break; 
+	    			  int result = s.update(price) ; 
 	    			  
 	    			  // TODO add trade/sell event to trade booking queue
 	    			  switch (result){
 	    			  		case Strategy.SELL: 
-	    			  			postMessage("Sell"); 
+	    			  			actionThread.addAction("SELL", s, time); 
 	    			  			break;
 	    			  		case Strategy.BUY:
-	    			  			postMessage("Buy"); 
+	    			  			actionThread.addAction("BUY", s, time); 
 	    			  			break; 
 	    			  		default:
 	    			  }
@@ -148,7 +159,7 @@ public class Client {
 	    	  }
 	    		   
 	      }
-	      
+   
 	      synchronized private void send(String c){
 	    	  
 	    	  if(state == ConnectionState.CONNECTED){
@@ -195,7 +206,7 @@ public class Client {
 	         in = null;
 	         out = null; 
 	      }
-	      
+	    
 	    public void run(){
 
 	    	try {
@@ -230,9 +241,9 @@ public class Client {
 	    				//postMessage(""+ time +": " + message); 
 	    	
 	    				try {
-	    					received(Double.parseDouble(message)); 
+	    					received(Float.parseFloat(message)); 
 	    				}catch(NumberFormatException e){
-	    					System.out.println("Error string not double"); 
+	    					System.out.println("Error string not float"); 
 	    					System.out.println(e); 
 	    				}
 	    				
@@ -245,12 +256,16 @@ public class Client {
 		               // might be the expected error that is generated when
 		               // a socket is closed).
 		            if (state != ConnectionState.CLOSED)
-		               postMessage("\n\n ERROR:  " + e);
+		               postMessage("\n\n Client ERROR:  " + e);
 	    	}finally{
+	    		
+	    		actionThread.close();  
 	    		cleanUp(); 
 	    	}
 	    }
 	}
+	
+	
 	
 	
 	
