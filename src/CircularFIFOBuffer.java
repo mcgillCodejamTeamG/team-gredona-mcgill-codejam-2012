@@ -1,5 +1,3 @@
-package codejamstrategies;
-
 import java.util.LinkedList;
 
 /**

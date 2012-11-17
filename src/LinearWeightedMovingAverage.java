@@ -1,4 +1,4 @@
-package codejamstrategies;
+
 
 /**
  * The Linear Weighted Moving Average uses weighting factors to assign more importance to recent data points.
