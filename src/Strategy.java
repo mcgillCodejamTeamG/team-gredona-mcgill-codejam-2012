@@ -36,7 +36,7 @@ public abstract class Strategy {
      *
      * @return the action recommended by the strategy ( BUY, HOLD, or SELL )
      */
-    public double update(double newDataPoint) {
+    public int update(double newDataPoint) {
         updateSlowDataBuffer(newDataPoint);
         updateFastDataBuffer(newDataPoint);
         previousSlowMovingAverage = currentSlowMovingAverage;
@@ -77,7 +77,7 @@ public abstract class Strategy {
      * Detects crossover.  If there is a crossover, this method decides whether or not to buy or sell.  Otherwise it holds.
      * @return the strategy's recommended course of action
      */
-    protected double decideTradingAction() {
+    protected int decideTradingAction() {
         if (currentFastMovingAverage == currentSlowMovingAverage) {
             if (currentFastMovingAverage > previousFastMovingAverage) {
                 return BUY;
