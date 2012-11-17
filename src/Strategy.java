@@ -1,5 +1,3 @@
-package codejamstrategies;
-
 /**
  *
  * @author Team Gredona
