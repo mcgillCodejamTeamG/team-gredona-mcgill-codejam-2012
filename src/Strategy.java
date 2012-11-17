@@ -1,5 +1,3 @@
-package codejamstrategies;
-
 /**
  *
  * @author Team Gredona
@@ -92,6 +90,7 @@ public abstract class Strategy {
      * @return the strategy's recommended course of action
      */
     protected int decideTradingAction() {
+	/**
         if (currentFastMovingAverage == currentSlowMovingAverage) {
             if (currentFastMovingAverage > previousFastMovingAverage) {
                 return BUY;
@@ -100,7 +99,7 @@ public abstract class Strategy {
                 return SELL;
             }
         }
-
+**/
         if (previousFastMovingAverage > previousSlowMovingAverage && currentFastMovingAverage < currentSlowMovingAverage) {
             return BUY;
         }
