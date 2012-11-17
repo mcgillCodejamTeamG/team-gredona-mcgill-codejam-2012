@@ -1,5 +1,3 @@
-
-
 import java.util.LinkedList;
 
 /**
@@ -8,8 +6,6 @@ import java.util.LinkedList;
  * Adapted from
  * stackoverflow.com/questions/5498865/size-limited-queue-that-holds-last-n-elements-in-java
  *
- * 
- * 
  * @author Team Gredona
  */
 public class CircularFIFOBuffer<E> extends LinkedList<E> {

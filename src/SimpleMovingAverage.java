@@ -1,5 +1,3 @@
-
-
 /**
  *
  * @author Team Gredona
@@ -21,8 +19,9 @@ public class SimpleMovingAverage extends Strategy {
      */
     @Override
     protected double computeSlowMovingAverage() {
-        if (SLOW_PERIOD > slowDataBuffer.size()) {
-            int t = slowDataBuffer.size();
+        int t = slowDataBuffer.size();
+        if (SLOW_PERIOD > t) {
+            
             double sum = 0;
             for (double datapoint : slowDataBuffer) {
                 sum += datapoint;
@@ -36,8 +35,8 @@ public class SimpleMovingAverage extends Strategy {
 
     @Override
     protected double computeFastMovingAverage() {
-        if (FAST_PERIOD > fastDataBuffer.size()) {
-            int t = fastDataBuffer.size();
+        int t = fastDataBuffer.size();
+        if (FAST_PERIOD > t) {
             double sum = 0;
             for (double datapoint : fastDataBuffer) {
                 sum += datapoint;

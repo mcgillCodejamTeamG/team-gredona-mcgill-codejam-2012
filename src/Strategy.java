@@ -48,8 +48,7 @@ public abstract class Strategy {
     }
 
     /**
-     *
-     * @param newDataPoint
+     *@param newDataPoint
      */
     public void updateFastDataQueue(double newDataPoint) {
         oldestFastDatapoint = fastDataBuffer.peek();
@@ -57,8 +56,7 @@ public abstract class Strategy {
     }
 
     /**
-     *
-     * @param newDataPoint
+     *@param newDataPoint
      */
     public void updateSlowDataQueue(double newDataPoint) {
         oldestSlowDatapoint = slowDataBuffer.peek();
@@ -72,14 +70,12 @@ public abstract class Strategy {
     protected abstract double computeSlowMovingAverage();
 
     /**
-     *
-     * @return the average over the last 5
+     *@return the average over the last 5
      */
     protected abstract double computeFastMovingAverage();
 
     /**
-     *
-     * @return the strategy's recommended course of action
+     *@return the strategy's recommended course of action
      */
     public double decideTradingAction() {
         if (currentFastMovingAverage == currentSlowMovingAverage) {
@@ -95,7 +91,6 @@ public abstract class Strategy {
 
     ;
 /**
- * 
  * @return the name or type of strategy
  */
     @Override

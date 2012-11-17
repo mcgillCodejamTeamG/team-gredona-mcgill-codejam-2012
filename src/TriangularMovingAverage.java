@@ -3,7 +3,7 @@
 /**
  * Smoothed version of the Simple Moving Average (SMA)
  *
- * @author Clark
+ * @author Team Gredona
  */
 public class TriangularMovingAverage extends Strategy {
 
