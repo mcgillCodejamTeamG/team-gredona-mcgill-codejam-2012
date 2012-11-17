@@ -24,7 +24,7 @@ public abstract class Strategy {
     protected CircularFIFOBuffer<Double> slowDataBuffer = new CircularFIFOBuffer(SLOW_PERIOD);
     protected CircularFIFOBuffer<Double> fastDataBuffer = new CircularFIFOBuffer(FAST_PERIOD);
     protected double currentFastMovingAverage, currentSlowMovingAverage;
-    protected double previousFastMovingAverage;
+    protected double previousFastMovingAverage, previousSlowMovingAverage;
     protected double oldestFastDatapoint, oldestSlowDatapoint;
 
     /**
@@ -41,6 +41,7 @@ public abstract class Strategy {
     public double update(double newDataPoint) {
         updateSlowDataQueue(newDataPoint);
         updateFastDataQueue(newDataPoint);
+        previousSlowMovingAverage = currentSlowMovingAverage;
         currentSlowMovingAverage = computeSlowMovingAverage();
         previousFastMovingAverage = currentFastMovingAverage;
         currentFastMovingAverage = computeFastMovingAverage();
@@ -75,6 +76,7 @@ public abstract class Strategy {
     protected abstract double computeFastMovingAverage();
 
     /**
+     * Detects crossover.  If there is a crossover, this method decides whether or not to buy or sell.  Otherwise it holds.
      * @return the strategy's recommended course of action
      */
     public double decideTradingAction() {
@@ -85,6 +87,15 @@ public abstract class Strategy {
             if (currentFastMovingAverage < previousFastMovingAverage) {
                 return SELL;
             }
+        }
+
+        if (previousFastMovingAverage > previousSlowMovingAverage && currentFastMovingAverage < currentSlowMovingAverage) {
+            return BUY;
+        }
+        
+        if (previousFastMovingAverage < previousSlowMovingAverage && currentFastMovingAverage > currentSlowMovingAverage) {
+            return SELL;
+          
         }
         return HOLD;
     }

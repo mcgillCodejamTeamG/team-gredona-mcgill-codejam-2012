@@ -1,3 +1,4 @@
+
 /**
  * The Exponential Moving Average is similar to the Linear Weighted Moving Average except it applies exponentially decreasing weighting factors to the data points
  * @author Team Gredona
