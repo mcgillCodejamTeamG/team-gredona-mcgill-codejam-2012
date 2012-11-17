@@ -11,7 +11,7 @@ public class SimpleMovingAverage extends Strategy {
      * for use by Triangular Moving Averages
      */
     protected CircularFIFOBuffer<Float> fastSMABuffer = new CircularFIFOBuffer(FAST_PERIOD);
-    protected CircularFIFOBuffer<Float> slowSMABuffer = new CircularFIFOBuffer(FAST_PERIOD);
+    protected CircularFIFOBuffer<Float> slowSMABuffer = new CircularFIFOBuffer(SLOW_PERIOD);
 
     public SimpleMovingAverage() {
         type = "Simple Moving Average";
@@ -31,7 +31,9 @@ public class SimpleMovingAverage extends Strategy {
             for (float datapoint : slowDataBuffer) {
                 sum += datapoint;
             }
-            return (sum / t);
+            float v = sum/t;
+            slowSMABuffer.add(v);
+            return v;
         }
 
         //When calculating successive values, a new value comes into the sum and and old one drops out, meaning full summation each time isn't necessary
@@ -44,18 +46,20 @@ public class SimpleMovingAverage extends Strategy {
     protected float computeFastMovingAverage() {
         int t = fastDataBuffer.size();
         
-        //for the first N = FAST_PERIOD = 20 data points, we simply take the average
+        //for the first N = FAST_PERIOD = 5 data points, we simply take the average
         if (FAST_PERIOD > t) {
             float sum = 0;
             for (float datapoint : fastDataBuffer) {
                 sum += datapoint;
             }
-            return (sum / t);
+            float v = sum/t;
+            fastSMABuffer.add(v);
+            return v;
         }
         
         //When calculating successive values, a new value comes into the sum and and old one drops out, meaning full summation each time isn't necessary
         float fastMovingAverage = currentFastMovingAverage - oldestFastDatapoint / FAST_PERIOD + fastDataBuffer.peekLast() / FAST_PERIOD;
-        slowSMABuffer.add(fastMovingAverage);
+        fastSMABuffer.add(fastMovingAverage);
         return fastMovingAverage;
     }
 
