@@ -12,6 +12,7 @@ public class TriangularMovingAverage extends Strategy {
     public TriangularMovingAverage(SimpleMovingAverage SMA) {
         mySMA = SMA;
         type = "Triangular Moving Average";
+        typeInt = 3;
     }
 
     @Override

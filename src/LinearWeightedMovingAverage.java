@@ -8,6 +8,7 @@ public class LinearWeightedMovingAverage extends Strategy {
 
     public LinearWeightedMovingAverage() {
         type = "Linear Weighted Moving Average";
+        typeInt = 1;
     }
 
     @Override

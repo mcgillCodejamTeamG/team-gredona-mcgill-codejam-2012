@@ -1,4 +1,4 @@
-
+package codejamstrategies;
 
 /**
  *
@@ -12,10 +12,15 @@ public abstract class Strategy {
     public static final int SELL = 1;
     public static final int FAST_PERIOD = 5;
     public static final int SLOW_PERIOD = 20;
+    public static final int SIMPLE_MOVING_AVERAGE = 0;
+    public static final int LINEAR_WEIGHTED_MOVING_AVERAGE = 1;
+    public static final int EXPONENTIAL_MOVING_AVERAGE = 2;
+    public static final int TRIANGULAR_MOVING_AVERAGE = 3;
     /**
      * The type of strategy
      */
     String type;
+    int typeInt;
     /**
      * Instantiates a "first in first out" buffer of size SLOW_PERIOD = 20 or
      * FAST_PERIOD = 5 that contains floats. When the buffer is full (ie size()
@@ -66,7 +71,7 @@ public abstract class Strategy {
         if (slowDataBuffer.size() != 0) {
             oldestSlowDatapoint = slowDataBuffer.peek();
         }
-        fastDataBuffer.add(newDataPoint);
+        slowDataBuffer.add(newDataPoint);
     }
 
     /**
@@ -108,7 +113,21 @@ public abstract class Strategy {
     }
 
     /**
-     * @return the name or type of strategy
+     *
+     * @return an int representation of the type 
+     * 
+     * SIMPLE_MOVING_AVERAGE = 0,
+     * LINEAR_WEIGHTED_MOVING_AVERAGE = 1,
+     * EXPONENTIAL_MOVING_AVERAGE = 2,
+     * TRIANGULAR_MOVING_AVERAGE = 3
+     *
+     */
+    public int getTypeInt() {
+        return typeInt;
+    }
+
+    /**
+     * @return the type of strategy as a String
      */
     @Override
     public String toString() {
