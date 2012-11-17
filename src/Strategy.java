@@ -5,9 +5,9 @@
  */
 public abstract class Strategy {
 
-    public static final int BUY = 0;
-    public static final int HOLD = 1;
-    public static final int SELL = 2;
+    public static final int BUY = 1;
+    public static final int HOLD = 0;
+    public static final int SELL = -1;
     public static final int FAST_PERIOD = 5;
     public static final int SLOW_PERIOD = 20;
     /**
