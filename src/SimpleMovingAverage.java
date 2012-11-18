@@ -11,7 +11,8 @@ public class SimpleMovingAverage extends Strategy {
     protected CircularFIFOBuffer<Float> fastSMABuffer = new CircularFIFOBuffer(FAST_PERIOD);
     protected CircularFIFOBuffer<Float> slowSMABuffer = new CircularFIFOBuffer(SLOW_PERIOD);
 
-    public SimpleMovingAverage() {
+    public SimpleMovingAverage(GraphData g) {
+        super(g);
         type = "Simple Moving Average";
         acronym = "SMA";
         typeInt = 0;
@@ -36,9 +37,10 @@ public class SimpleMovingAverage extends Strategy {
         }
 
         //When calculating successive values, a new value comes into the sum and and old one drops out, meaning full summation each time isn't necessary
-        float slowMovingAverage = currentSlowMovingAverage - oldestSlowDatapoint / SLOW_PERIOD + slowDataBuffer.peekLast() / SLOW_PERIOD;
-        slowSMABuffer.add(slowMovingAverage);
-        return slowMovingAverage;
+        float SMA = currentSlowMovingAverage - oldestSlowDatapoint / SLOW_PERIOD + slowDataBuffer.peekLast() / SLOW_PERIOD;
+        slowSMABuffer.add(SMA);
+        myGraphData.pushSlowSMA(SMA);
+        return SMA;
     }
 
     @Override
@@ -57,9 +59,10 @@ public class SimpleMovingAverage extends Strategy {
         }
         
         //When calculating successive values, a new value comes into the sum and and old one drops out, meaning full summation each time isn't necessary
-        float fastMovingAverage = currentFastMovingAverage - oldestFastDatapoint / FAST_PERIOD + fastDataBuffer.peekLast() / FAST_PERIOD;
-        fastSMABuffer.add(fastMovingAverage);
-        return fastMovingAverage;
+        float FMA = currentFastMovingAverage - oldestFastDatapoint / FAST_PERIOD + fastDataBuffer.peekLast() / FAST_PERIOD;
+        myGraphData.pushFastSMA(FMA);
+        fastSMABuffer.add(FMA);
+        return FMA;
     }
 
     /**

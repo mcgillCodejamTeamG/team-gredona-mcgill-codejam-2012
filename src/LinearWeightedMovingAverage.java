@@ -1,14 +1,15 @@
-
 /**
  * The Linear Weighted Moving Average uses weighting factors to assign more importance to recent data points.
  * @author Team Gredona
  */
 public class LinearWeightedMovingAverage extends Strategy {
 
-    public LinearWeightedMovingAverage() {
+    public LinearWeightedMovingAverage(GraphData g) {
+        super(g);
         type = "Linear Weighted Moving Average";
         acronym = "LWMA";
         typeInt = 1;
+        
     }
 
     @Override
@@ -22,8 +23,10 @@ public class LinearWeightedMovingAverage extends Strategy {
             //For any period N, the current price is multiplied by N, the previous price is multiplied by N-1, and so on
             sumOfWeightedPrices += slowDataBuffer.get(index) * (index + 1); 
         }
-
-        return (sumOfWeightedPrices / sumOfWeightingFactors);
+        
+        float SMA = (sumOfWeightedPrices / sumOfWeightingFactors);
+        myGraphData.pushSlowLWMA(SMA);
+        return SMA;
         //}
     }
 
@@ -37,8 +40,10 @@ public class LinearWeightedMovingAverage extends Strategy {
             //For any period, the current price is multiplied by N, the previous price is multiplied by N-1, and so on
             sumOfWeightedPrices += fastDataBuffer.get(index) * (index + 1);
         }
-
-        return (sumOfWeightedPrices / sumOfWeightingFactors);
+        
+        float FMA = (sumOfWeightedPrices / sumOfWeightingFactors);
+        myGraphData.pushFastLWMA(FMA);
+        return FMA;
         //}
     }
 }

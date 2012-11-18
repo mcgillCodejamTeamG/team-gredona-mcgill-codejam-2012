@@ -7,7 +7,8 @@ public class TriangularMovingAverage extends Strategy {
 
     SimpleMovingAverage mySMA;
 
-    public TriangularMovingAverage(SimpleMovingAverage SMA) {
+    public TriangularMovingAverage(SimpleMovingAverage SMA, GraphData g) {
+        super(g);
         mySMA = SMA;
         type = "Triangular Moving Average";
         acronym = "TMA";
@@ -22,8 +23,10 @@ public class TriangularMovingAverage extends Strategy {
         for (int index = 0; index < t; index++) {
             sumOfWeightedPrices += mySMA.getSlowBufferValue(index) * (index + 1);
         }
-
-        return (sumOfWeightedPrices / sumOfWeightingFactors);
+        
+        float SMA = sumOfWeightedPrices / sumOfWeightingFactors;
+        myGraphData.pushSlowTMA(SMA);
+        return SMA;
 
     }
 
@@ -35,7 +38,8 @@ public class TriangularMovingAverage extends Strategy {
         for (int index = 0; index < t; index++) {
             sumOfWeightedPrices += mySMA.getFastBufferValue(index) * (index + 1);
         }
-
-        return (sumOfWeightedPrices / sumOfWeightingFactors);
+        float FMA = sumOfWeightedPrices / sumOfWeightingFactors;
+        myGraphData.pushFastTMA(FMA);
+        return FMA;
     }
 }

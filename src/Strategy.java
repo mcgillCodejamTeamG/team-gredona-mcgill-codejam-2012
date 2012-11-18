@@ -1,4 +1,3 @@
-package codejamstrategies;
 /**
  *
  * @author Team Gredona
@@ -30,13 +29,19 @@ public abstract class Strategy {
     protected float currentFastMovingAverage, currentSlowMovingAverage;
     protected float previousFastMovingAverage, previousSlowMovingAverage;
     protected float oldestFastDatapoint, oldestSlowDatapoint;
+    protected GraphData myGraphData;
 
     /**
      * Constructor
      */
     public Strategy() {
+        
     }
 
+    public Strategy(GraphData g) {
+        myGraphData = g;
+    }
+    
     /**
      * Updates the strategy with a new data point.
      *

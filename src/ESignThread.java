@@ -12,7 +12,7 @@ import org.json.JSONObject;
 
 /**
  * Creates new thread for esigning the data
- * @author TeamG
+ * @author Team Gredona
  */
 public class ESignThread extends Thread {
     private String JSONString;
