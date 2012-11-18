@@ -1,3 +1,6 @@
+
+package util;
+
 /**
  * Smoothed version of the Simple Moving Average (SMA)
  *

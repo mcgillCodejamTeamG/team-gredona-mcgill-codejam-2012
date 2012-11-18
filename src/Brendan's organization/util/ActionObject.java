@@ -1,3 +1,5 @@
+package util;
+
 class ActionObject{
 	private String type;
 	private int time;
