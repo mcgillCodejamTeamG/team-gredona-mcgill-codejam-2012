@@ -1,4 +1,5 @@
 
+package util;
 
 /**
  * Unweighted mean of the last N data points
