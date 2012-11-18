@@ -1,5 +1,4 @@
 
-
 /**
  * Smoothed version of the Simple Moving Average (SMA)
  *
