@@ -17,29 +17,23 @@ public abstract class Strategy {
     /**
      * The type of strategy
      */
-    String type, acronym;
+    String type;
     int typeInt;
     /**
      * Instantiates a "first in first out" buffer of size SLOW_PERIOD = 20 or
      * FAST_PERIOD = 5 that contains floats. When the buffer is full (ie size()
      * = 20 or 5, respectively), the head is removed to create space
      */
-    protected CircularFIFOBuffer<Float> slowDataBuffer = new CircularFIFOBuffer(SLOW_PERIOD);
-    protected CircularFIFOBuffer<Float> fastDataBuffer = new CircularFIFOBuffer(FAST_PERIOD);
+    protected CircularFIFOBuffer<Float> slowDataBuffer = new CircularFIFOBuffer<Float>(SLOW_PERIOD);
+    protected CircularFIFOBuffer<Float> fastDataBuffer = new CircularFIFOBuffer<Float>(FAST_PERIOD);
     protected float currentFastMovingAverage, currentSlowMovingAverage;
     protected float previousFastMovingAverage, previousSlowMovingAverage;
     protected float oldestFastDatapoint, oldestSlowDatapoint;
-    protected GraphData myGraphData;
 
     /**
      * Constructor
      */
     public Strategy() {
-        
-    }
-
-    public Strategy(GraphData g) {
-        myGraphData = g;
     }
     
     /**
@@ -75,7 +69,7 @@ public abstract class Strategy {
         if (slowDataBuffer.size() != 0) {
             oldestSlowDatapoint = slowDataBuffer.peek();
         }
-        fastDataBuffer.add(newDataPoint);
+        slowDataBuffer.add(newDataPoint);
     }
 
     /**
@@ -96,14 +90,7 @@ public abstract class Strategy {
      * @return the strategy's recommended course of action
      */
     protected int decideTradingAction() {
-        if (currentFastMovingAverage == currentSlowMovingAverage) {
-            if (currentFastMovingAverage > previousFastMovingAverage) {
-                return BUY;
-            }
-            if (currentFastMovingAverage < previousFastMovingAverage) {
-                return SELL;
-            }
-        }
+      
 
         if (previousFastMovingAverage > previousSlowMovingAverage && currentFastMovingAverage < currentSlowMovingAverage) {
             return BUY;
@@ -136,9 +123,5 @@ public abstract class Strategy {
     @Override
     public String toString() {
         return type;
-    }
-    
-    public String getAcronym() {
-        return acronym;
     }
 }

@@ -1,3 +1,5 @@
+
+
 /**
  * Unweighted mean of the last N data points
  *
@@ -8,8 +10,8 @@ public class SimpleMovingAverage extends Strategy {
     /**
      * for use by Triangular Moving Averages
      */
-    protected CircularFIFOBuffer<Float> fastSMABuffer = new CircularFIFOBuffer(FAST_PERIOD);
-    protected CircularFIFOBuffer<Float> slowSMABuffer = new CircularFIFOBuffer(SLOW_PERIOD);
+    protected CircularFIFOBuffer<Float> fastSMABuffer = new CircularFIFOBuffer<Float>(FAST_PERIOD);
+    protected CircularFIFOBuffer<Float> slowSMABuffer = new CircularFIFOBuffer<Float>(SLOW_PERIOD);
 
     public SimpleMovingAverage(GraphData g) {
         super(g);
@@ -33,6 +35,7 @@ public class SimpleMovingAverage extends Strategy {
             }
             float v = sum/t;
             slowSMABuffer.add(v);
+            myGraphData.pushSlowSMA(v); 
             return v;
         }
 
@@ -55,6 +58,7 @@ public class SimpleMovingAverage extends Strategy {
             }
             float v = sum/t;
             fastSMABuffer.add(v);
+            fastSMABuffer.add(v); 
             return v;
         }
         

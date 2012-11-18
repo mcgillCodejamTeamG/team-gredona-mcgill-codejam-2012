@@ -1,13 +1,14 @@
+
+
+
 /**
  * The Exponential Moving Average is similar to the Linear Weighted Moving Average except it applies exponentially decreasing weighting factors to the data points
  * @author Team Gredona
  */
 public class ExponentialMovingAverage extends Strategy {
 
-    public ExponentialMovingAverage(GraphData g) {
-        super(g);
-        type = "Exponential Moving Average";
-        acronym = "EMA";
+    public ExponentialMovingAverage() {
+        type = "ExponentialMovingAverage";
         typeInt = 2;
     }
 
@@ -22,12 +23,10 @@ public class ExponentialMovingAverage extends Strategy {
         }
         
         //Then we use the recursive formula for all t > 1
-        float SMA = currentSlowMovingAverage + alpha * (slowDataBuffer.peekLast() - currentSlowMovingAverage);
-        myGraphData.pushSlowEMA(SMA);
-        return SMA;
+        return currentSlowMovingAverage + alpha * (slowDataBuffer.peekLast() - currentSlowMovingAverage);
     }
 
-    @Override
+
     protected float computeFastMovingAverage() {
         //int t = slowDataBuffer.size();
         float alpha = 2.0f / (FAST_PERIOD + 1);
@@ -38,9 +37,6 @@ public class ExponentialMovingAverage extends Strategy {
         }
         
         //Then we use the recursive formula for all t > 1
-        float FMA = currentFastMovingAverage + alpha * (fastDataBuffer.peekLast() - currentFastMovingAverage);
-        myGraphData.pushFastEMA(FMA);
-        return FMA;
-        
+        return currentFastMovingAverage + alpha * (fastDataBuffer.peekLast() - currentFastMovingAverage);
     }
 }
