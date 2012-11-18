@@ -1,4 +1,3 @@
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,12 +14,8 @@ import org.json.JSONObject;
 
 /**
  * Creates new thread for esigning the data
-<<<<<<< HEAD
- * @author Team Gredona
-=======
  *
- * @author TeamG
->>>>>>> 0c4a0f4c6d18b2282f2622280fc8691d4df19220
+ * @author Team Gredona
  */
 public class ESignThread extends Thread {
 
