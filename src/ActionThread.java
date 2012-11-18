@@ -17,7 +17,7 @@ import org.json.JSONObject;
  * Thread which takes action methods sends information to the server and creates
  * JSON
  *
- * @author TeamG
+ * @author Team Gredona
  *
  *
  */
