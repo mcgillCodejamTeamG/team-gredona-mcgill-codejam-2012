@@ -33,10 +33,10 @@ public class SimpleMovingAverage extends Strategy {
             for (float datapoint : slowDataBuffer) {
                 sum += datapoint;
             }
-            float v = sum/t;
-            slowSMABuffer.add(v);
-            myGraphData.pushSlowSMA(v); 
-            return v;
+            float SMA = sum/t;
+            slowSMABuffer.add(SMA);
+            myGraphData.pushSlowSMA(SMA); 
+            return SMA;
         }
 
         //When calculating successive values, a new value comes into the sum and and old one drops out, meaning full summation each time isn't necessary
@@ -56,10 +56,10 @@ public class SimpleMovingAverage extends Strategy {
             for (float datapoint : fastDataBuffer) {
                 sum += datapoint;
             }
-            float v = sum/t;
-            fastSMABuffer.add(v);
-            fastSMABuffer.add(v); 
-            return v;
+            float FMA = sum/t;
+            fastSMABuffer.add(FMA);
+            myGraphData.pushFastSMA(FMA);
+            return FMA;
         }
         
         //When calculating successive values, a new value comes into the sum and and old one drops out, meaning full summation each time isn't necessary
