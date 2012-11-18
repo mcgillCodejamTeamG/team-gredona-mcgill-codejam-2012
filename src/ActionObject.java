@@ -1,8 +1,11 @@
-public class ActionObject{
-	private String type, strategy;
+package util;
+
+class ActionObject{
+	private String type;
 	private int time;
-	
-	public ActionObject(String actionType, String strategyType, int timeOfAction){
+	private Strategy strategy;
+
+	public ActionObject(String actionType, Strategy strategyType, int timeOfAction){
 		this.type = actionType;
 		this.strategy = strategyType;
 		this.time = timeOfAction;
@@ -10,10 +13,12 @@ public class ActionObject{
 	public String getType(){
 		return type;
 	}
-	public String getStrategy(){
+	public Strategy getStrategy(){
 		return strategy;
 	}
 	public int getTime(){
 		return time;
 	}
 }
+
+
