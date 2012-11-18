@@ -116,7 +116,7 @@ public class ActionThread extends Thread {
 
         String jsonString = this.json.toString(2);
         Writer output = null;
-        File file = new File("json"+jsonCounter+".txt");
+        File file = new File("json"+jsonCounter+".json");
         jsonCounter++;
         output = new BufferedWriter(new FileWriter(file));
         output.write(jsonString);
