@@ -84,7 +84,7 @@ class CircularFloatArray {
             if (index == start)
                 return 0; 
             
-            return (101+index-start)%101; 
+            return (100+index-start)%100; 
         }
 	
 	public CircularFloatArray(){

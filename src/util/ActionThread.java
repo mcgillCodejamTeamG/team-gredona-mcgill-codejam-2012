@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.Writer;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Queue;
 import org.json.JSONException;
@@ -46,6 +48,8 @@ public class ActionThread extends Thread {
     private ActionListener finishedListener;
     private TableData tableData; 
     
+    private LinkedList<ActionObject> actions; 
+    
     private Object lock; 
     
     
@@ -66,9 +70,12 @@ public class ActionThread extends Thread {
         
         json = new JSONObject();
         q = new SuperQueue<ActionObject>(); 
+        actions = new LinkedList<ActionObject>();  
         
         state = ConnectionState.CONNECTING;
         this.start();
+        
+        
     }
     
     
@@ -103,15 +110,9 @@ public class ActionThread extends Thread {
         }
     }
     
+   
     synchronized void close() {
         state = ConnectionState.CLOSED;
-        try {
-            if (socket != null) {
-                socket.close();
-            }
-            
-        } catch (IOException e) {
-        }
     }
 
     /**
@@ -122,6 +123,7 @@ public class ActionThread extends Thread {
      * @throws IOException
      */
     private void cleanUp() throws JSONException, IOException {
+            
         state = ConnectionState.CLOSED;
         if (socket != null && !socket.isClosed()) {
             // Make sure that the socket, if any, is closed.
@@ -149,140 +151,96 @@ public class ActionThread extends Thread {
         if (finishedListener != null)
             finishedListener.actionPerformed(null);
     }
-
-    /**
-     * Sends a buy order to the server, adds to JSON
-     *
-     * @author TeamG
-     *
-     */
-    synchronized private void buy(ActionObject buy) throws IOException, JSONException {
-        
-        float price = 0;
+    
+    
+    synchronized private void buysell(ActionObject ao)  {
         out.println('B');
         out.flush();
         if (out.checkError()) {
             close();
         }
-        
-        int time = buy.getTime();
-        Strategy strategy = buy.getStrategy();
-
-
-        // Get input************
-        char c;
-        int size = 0;
-        char cbuf[] = new char[7];
-        int decimal = 0;
-        boolean decimalFlag = false;
-        while (decimal < 3) {
-            c = (char) in.read();
-            
-            cbuf[size] = c;
-            size++;
-            
-            if (decimalFlag) {
-                decimal++;
-            }
-            
-            if (c == '.') {
-                decimalFlag = true;
-            }
-            
-            if (c == 'E') {
-                break;
-            }
-        }
-        
-        String message = "";
-        for (int i = 0; i < size; i++) {
-            message += cbuf[i];
-        }
+        actions.add(ao);
         
         
-        if (message.charAt(0) == 'E') {
-            System.out.println("Received Trading E");
-        } else {
-            
-            
-            int manager = ManagerSchedule.getManager(time, strategy.getTypeInt());
-            
-            JSONObject transaction = new JSONObject();
-            transaction.put("time", time);
-            transaction.put("type", "buy");
-            transaction.put("price", message);
-            transaction.put("manager", "manager " + manager);
-            transaction.put("strategy", strategy.getAcronym());
-            json.accumulate("transactions", transaction);
-        }
-        
-    }
-
-    /**
-     * Sends a sell order to the server, adds to JSON
-     *
-     * @author TeamG
-     *
-     */
-    synchronized private void sell(ActionObject sell) throws IOException, JSONException {
-        float price = 0;
-        out.println('S');
-        out.flush();
-        if (out.checkError()) {
-            close();
-        }
-        
-        int time = sell.getTime();
-        Strategy strategy = sell.getStrategy();
-
-
-        // Get input************
-        char c;
-        int size = 0;
-        char cbuf[] = new char[7];
-        int decimal = 0;
-        boolean decimalFlag = false;
-        while (decimal < 3) {
-            c = (char) in.read();
-            
-            cbuf[size] = c;
-            size++;
-            
-            if (decimalFlag) {
-                decimal++;
-            }
-            
-            if (c == '.') {
-                decimalFlag = true;
-            }
-            
-            if (c == 'E') {
-                break;
-            }
-        }
-        String message = "";
-        for (int i = 0; i < size; i++) {
-            message += cbuf[i];
-        }
-        
-        if (message.charAt(0) == 'E') {
-            System.out.println("Received Trading E");
-        } else {
-            
-            
-            int manager = ManagerSchedule.getManager(time, strategy.getTypeInt());
-            
-            JSONObject transaction = new JSONObject();
-            transaction.put("time", time);
-            transaction.put("type", "sell");
-            transaction.put("price", message);
-            transaction.put("manager", "manager " + manager);
-            transaction.put("strategy", strategy.getAcronym());
-            json.accumulate("transactions", transaction);
-            
-        }
     }
     
+    private String readNext() throws IOException{
+        
+          // Get input************
+        char c;
+        int size = 0;
+        char cbuf[] = new char[7];
+        int decimal = 0;
+        boolean decimalFlag = false;
+        while (decimal < 3) {
+            c = (char) in.read();
+            
+            cbuf[size] = c;
+            size++;
+            
+            if (decimalFlag) {
+                decimal++;
+            }
+            
+            if (c == '.') {
+                decimalFlag = true;
+            }
+            
+            if (c == 'E') {
+                break;
+            }
+        }
+        
+        String message = "";
+        for (int i = 0; i < size; i++) {
+            message += cbuf[i];
+        }
+        
+        
+        if (message.charAt(0) == 'E')
+            return null; 
+        
+        return message; 
+        
+    }
+    
+    private void buildJSON() throws JSONException{
+        
+
+        Iterator<ActionObject> iter = actions.iterator(); 
+        
+        while (iter.hasNext()){
+            
+            ActionObject ao = iter.next(); 
+            
+            String message = null; 
+            try {
+                 message = this.readNext(); 
+            }catch (IOException e){
+                continue; 
+            }
+            
+            if (message == null)
+                continue; 
+            
+            int time = ao.getTime();
+            Strategy strategy = ao.getStrategy();
+
+            int manager = ManagerSchedule.getManager(time, strategy.getTypeInt());
+            
+            JSONObject transaction = new JSONObject();
+            transaction.put("time", time);
+            transaction.put("type", ao.getType().toLowerCase());
+            transaction.put("price", message);
+            transaction.put("manager", "manager " + manager);
+            transaction.put("strategy", strategy.getAcronym());
+            json.accumulate("transactions", transaction);
+        }
+    
+        
+    }
+
+
     
     public  SuperQueue<ActionObject> getSuperQueue(){
         return q; 
@@ -312,22 +270,21 @@ public class ActionThread extends Thread {
                 ActionObject currentAction = null;
                 while (q.peek() != null) {
                     currentAction = q.pop();
-                    if (currentAction.getType().equals("BUY")) {
-                        buy(currentAction);
-                    } else if (currentAction.getType().equals("SELL")) {
-                        sell(currentAction);
-                    } else if (currentAction.getType().equals("END")) {
-                        cleanUp();
-                    }
+                    buysell(currentAction); 
                 }
-                
-                
+ 
                 synchronized(lock){
                     lock.wait(); 
                 }
                 
             }   //end while connected
-
+            
+        
+        buildJSON();
+        if (socket != null) {
+                socket.close();
+            }
+       
         } catch (Exception e) {
 
             // An error occurred.  Report it to the user, but not
