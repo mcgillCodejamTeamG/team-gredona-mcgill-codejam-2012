@@ -1,9 +1,9 @@
 McGill Codejam 2012 
 16 November 2012 - 18 November 2012
 
-Team Gredo�a
+Team Gredoña
 
-Clark Gredo�a
+Clark Gredoña
 Peter Henderson
 Jordan Stirling
 Brendan Galea
