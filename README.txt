@@ -9,6 +9,8 @@ Jordan Stirling
 Brendan Galea
 Matt Vertescher
 
+Can run in any OS that supports that Java.
+
 Instructions: 
 
 From one computer, choose the ports, data, and start the exchange by entering 'java -jar msExchange.jar -p 3000 -t -d data/amd.txt' in terminal, for instance.
