@@ -102,11 +102,11 @@ public abstract class Strategy {
     protected int decideTradingAction() {
 
         if (previousFastMovingAverage > previousSlowMovingAverage && currentFastMovingAverage < currentSlowMovingAverage) {
-            return BUY;
+            return SELL;
         }
 
         if (previousFastMovingAverage < previousSlowMovingAverage && currentFastMovingAverage > currentSlowMovingAverage) {
-            return SELL;
+            return BUY;
 
         }
         return HOLD;
